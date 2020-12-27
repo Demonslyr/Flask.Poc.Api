@@ -2,7 +2,8 @@ import base64
 import json
 import sys
 import time
-import urllib.request
+#https://realpython.com/python-requests/
+import requests
 
 from html import escape
 from fastapi import Depends, FastAPI, HTTPException, status, Request, Header
@@ -19,26 +20,26 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 @app.get("/owo_proxy/{text}")
-async def owo_proxy(text):
-    with urllib.request.urlopen(f'https://owo.drinkpoint.me/{escape(text)}') as response:
-        return {"message": response}
+def owo_proxy(text):
+    response = requests.get(f'https://owo.drinkpoint.me/{escape(text)}')
+    return {"message": response.content}
 
 @app.get("/")
-async def root():
+def root():
     return {"message": "Hello World"}
 
 @app.get("/hello")
-async def hello_endpoint():
+def hello_endpoint():
     version = f"{sys.version_info.major}.{sys.version_info.minor}"
     message = f"Hello world! From Uvicorn with Gunicorn. Using Python {version}".encode("utf-8")
     return {"message": message}
 
 @app.get("/items/{item_id}")
-async def read_item(item_id):
+def read_item(item_id):
     return {"item_id": item_id}
 
 @app.get("/items_int/{item_id}")
-async def read_item_int(item_id: int):
+def read_item_int(item_id: int):
     return {"item_id": item_id}
 
 class DataWithSecretsIn(BaseModel):
@@ -49,11 +50,11 @@ class DataWithSecretsOut(BaseModel):
     data: str
 
 @app.post("/data/", response_model=DataWithSecretsOut)
-async def ingest_data_and_secrets(dataPayload: DataWithSecretsIn):
+def ingest_data_and_secrets(dataPayload: DataWithSecretsIn):
     return dataPayload
 
 @app.get("/jwtDecode")
-async def reurn_decoded_JWT(authorize: str = Header(None)):
+def reurn_decoded_JWT(authorize: str = Header(None)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
