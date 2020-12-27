@@ -2,7 +2,9 @@ import base64
 import json
 import sys
 import time
+import urllib.request
 
+from html import escape
 from fastapi import Depends, FastAPI, HTTPException, status, Request, Header
 from jose import JWTError, jwt
 from pydantic import BaseModel
@@ -15,6 +17,11 @@ async def add_process_time_header(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
     return response
+
+@app.get("/owo_proxy/{text}")
+async def owo_proxy(text):
+    with urllib.request.urlopen(f'https://owo.drinkpoint.me/{escape(text)}') as response:
+        return {"message": response}
 
 @app.get("/")
 async def root():
